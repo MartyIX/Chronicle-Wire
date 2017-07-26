@@ -81,27 +81,37 @@ public enum WireInternal {
 
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) {
+        //System.out.println("WireInternal.writeData(metaData:"+metaData+", notComplete:"+notComplete+")");
         wireOut.getValueOut().resetBetweenDocuments();
         assert wireOut.startUse();
         long position;
         try {
+            //System.out.println("WireInternal.writeData(): About to: wireOut.bytes()");
             @NotNull Bytes bytes = wireOut.bytes();
+            //System.out.println("WireInternal.writeData(): About to: bytes.writePosition() [1]");
             position = bytes.writePosition();
+            //System.out.println("WireInternal.writeData(): position = " + position);
 
             int metaDataBit = metaData ? Wires.META_DATA : 0;
             int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
+            //System.out.println("WireInternal.writeData(): About to: bytes.writeOrderedInt():"+len0);
             bytes.writeOrderedInt(len0);
+            //System.out.println("WireInternal.writeData(): About to: writer.writeMarshallable():");
             writer.writeMarshallable(wireOut);
+            //System.out.println("WireInternal.writeData(): About to: bytes.writePosition() [2]");
             long position1 = bytes.writePosition();
+            //System.out.println("WireInternal.writeData(): position1="+position1);
 //            if (position1 < position)
 //                System.out.println("Message truncated from " + position + " to " + position1);
             int length = metaDataBit | toIntU30(position1 - position - 4, "Document length %,d out of 30-bit int range.");
             if (!bytes.compareAndSwapInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0)))
                 throw new IllegalStateException("This wire was altered by more than one thread.");
         } finally {
+            //System.out.println("WireInternal.writeData(): About to assert wireOut.endUse()");
             assert wireOut.endUse();
         }
 
+        //System.out.println("WireInternal.writeData(-):"+position);
         return position;
     }
 
@@ -125,10 +135,12 @@ public enum WireInternal {
     public static boolean readData(@NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
                                    @Nullable ReadMarshallable dataConsumer) {
+        //System.out.println("WireInternal.readData(wireIn, metaDataConsumer, dataConsumer)");
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         boolean read = false;
         while (bytes.readRemaining() >= 4) {
             long position = bytes.readPosition();
+            //System.out.println("WireInternal.readData(): position:" + position);
             int header = bytes.readVolatileInt(position);
             if (!isKnownLength(header))
                 return read;
@@ -137,10 +149,14 @@ public enum WireInternal {
             final int len = Wires.lengthOf(header);
             if (Wires.isData(header)) {
                 if (dataConsumer == null) {
+                    //System.out.println("WireInternal.readData(-):false // dataConsumer = null [1]");
                     return false;
 
                 } else {
+                    //System.out.println("WireInternal.readData(): About to: bytes.readWithLength(). Len=" + len);
                     bytes.readWithLength(len, b -> dataConsumer.readMarshallable(wireIn));
+
+                    //System.out.println("WireInternal.readData(-): true");
                     return true;
                 }
             } else {
@@ -164,11 +180,15 @@ public enum WireInternal {
                     }
                 }
 
-                if (dataConsumer == null)
+                if (dataConsumer == null) {
+                    //System.out.println("WireInternal.readData(-):dataConsumer = null [2]");
                     return true;
+                }
                 read = true;
             }
         }
+
+        //System.out.println("WireInternal.readData(-):" + read);
         return read;
     }
 
