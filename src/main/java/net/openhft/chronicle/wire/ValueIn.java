@@ -47,12 +47,10 @@ public interface ValueIn {
      */
     @NotNull
     default <T> WireIn text(T t, @NotNull BiConsumer<T, String> ts) {
-        //System.out.println("ValueIn.text(t, ts)");
         @Nullable final String text = text();
         ts.accept(t, text);
 
         WireIn wireIn = wireIn();
-        //System.out.println("ValueIn.text(-)");
         return wireIn;
     }
 

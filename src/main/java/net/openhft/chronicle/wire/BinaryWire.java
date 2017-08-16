@@ -703,10 +703,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     @NotNull
     <ACS extends Appendable & CharSequence> ACS getStringBuilder(int code, @NotNull ACS sb) {
-        //System.out.println("BinaryWire.getStringBuilder(code:"+code+")");
         bytes.parseUtf8(sb, code & 0x1f);
 
-        //System.out.println("BinaryWire.getStringBuilder(-):"+sb.toString());
         return sb;
     }
 
@@ -1009,14 +1007,12 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public ValueOut write(@NotNull WireKey key) {
-        //System.out.println("BinaryWire.write(key)");
         if (!fieldLess) {
             if (numericFields)
                 writeField(key.code());
             else
                 writeField(key.name());
         }
-        //System.out.println("BinaryWire.write(-)");
         return valueOut;
     }
 
@@ -1222,7 +1218,6 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
-            //System.out.println("BinaryWire.text(s:"+s+")");
 
             if (s == null) {
                 nu11();
@@ -1237,7 +1232,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
             }
 
-            //System.out.println("BinaryWire.text(-)");
             return BinaryWire.this;
         }
 
@@ -2124,16 +2118,13 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Nullable
         @Override
         public String text() {
-            //System.out.println("BinaryWire.text()");
             int code = readCode();
-            //System.out.println("BinaryWire.text(): code="+code);
             switch (code) {
                 case NULL:
                     return null;
 
                 case STRING_ANY: {
                     long len0 = bytes.readStopBit();
-                    //System.out.println("BinaryWire.text[stringAny](): len0="+len0);
                     if (len0 == -1L) {
                         return null;
 
@@ -2141,18 +2132,15 @@ public class BinaryWire extends AbstractWire implements Wire {
                     int len = Maths.toUInt31(len0);
                     long limit = bytes.readLimit();
                     long end = bytes.readPosition() + len;
-                    //System.out.println("BinaryWire.text[stringAny](): len="+len+"; limit="+limit+"; end="+end);
                     try {
 
                         bytes.readLimit(end);
                         String intern = UTF8.intern(bytes);
 
-                        //System.out.println("BinaryWire.text[stringAny](-):intern="+intern);
                         return intern;
                     } finally {
                         bytes.readLimit(limit);
                         bytes.readPosition(end);
-                        //System.out.println("BinaryWire.text[stringAny](-)");
                     }
                 }
 
@@ -2164,9 +2152,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return new String(bytes, StandardCharsets.UTF_8);
                     }
                     @Nullable StringBuilder text = readText(code, acquireStringBuilder());
-                    //System.out.println("BinaryWire.text[typePrefix](-)");
                     String intern = WireInternal.INTERNER.intern(text);
-                    //System.out.println("BinaryWire.text(-)[intern]:intern="+intern);
                     return intern;
                 }
 
@@ -2175,9 +2161,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     @Nullable StringBuilder text = ((code & 0xE0) == 0xE0)
                             ? getStringBuilder(code, sb)
                             : readText(code, sb);
-                    //System.out.println("BinaryWire.text[default](-)");
                     String s = text == null ? null : WireInternal.INTERNER.intern(text);
-                    //System.out.println("BinaryWire.text(-)[default]:s="+s);
                     return s;
                 }
             }
@@ -2491,7 +2475,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 default:
                     if (code >= STRING_0)
                         return code + (1 - STRING_0);
-                    //System.out.println("code=" + code + ", bytes=" + bytes.toHexString());
                     return -1;
             }
 

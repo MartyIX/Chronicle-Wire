@@ -57,7 +57,6 @@ public class WireDumper {
 
     @NotNull
     public String asString(long position, long length) {
-        //System.out.println("WireDumper.asString(position:"+position+", length:"+length+")");
 
         @NotNull StringBuilder sb = new StringBuilder();
         final long limit0 = bytes.readLimit();
@@ -85,7 +84,6 @@ public class WireDumper {
             bytes2.release();
         }
 
-        //System.out.println("WireDumper.asString(-):" + sb.toString());
         return sb.toString();
     }
 
