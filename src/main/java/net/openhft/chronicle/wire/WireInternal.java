@@ -141,7 +141,6 @@ public enum WireInternal {
 
                 } else {
                     bytes.readWithLength(len, b -> dataConsumer.readMarshallable(wireIn));
-
                     return true;
                 }
             } else {
@@ -165,13 +164,11 @@ public enum WireInternal {
                     }
                 }
 
-                if (dataConsumer == null) {
+                if (dataConsumer == null)
                     return true;
-                }
                 read = true;
             }
         }
-
         return read;
     }
 

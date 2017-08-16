@@ -57,7 +57,6 @@ public class WireDumper {
 
     @NotNull
     public String asString(long position, long length) {
-
         @NotNull StringBuilder sb = new StringBuilder();
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
@@ -83,7 +82,6 @@ public class WireDumper {
             bytes.readPosition(position0);
             bytes2.release();
         }
-
         return sb.toString();
     }
 
